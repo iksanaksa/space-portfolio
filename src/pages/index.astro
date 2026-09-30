@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import Scene3D from '../components/Scene3D'
 ---
 
 <BaseLayout title="Mission Portfolio">
@@ -11,8 +12,9 @@ import BaseLayout from '../layouts/BaseLayout.astro'
       Halo, dunia.
     </h1>
     <p style="color: rgba(245, 240, 232, 0.7);">
-      Kalau lo lihat halaman ini dengan font serif di judul dan warna amber di atas,
-      berarti layout sudah bekerja.
+      Di bawah ini adalah test render 3D pertama.
     </p>
+
+    <Scene3D client:only="react" />
   </main>
 </BaseLayout>
