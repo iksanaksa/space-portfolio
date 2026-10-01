@@ -3,6 +3,7 @@ import { OrbitControls } from '@react-three/drei'
 import Starfield from './Starfield'
 import Sun from './Sun'
 import Planet from './Planet'
+import AsteroidBelt from './AsteroidBelt'
 import { planets } from '../data/planets'
 
 export default function Scene3D() {
@@ -16,9 +17,15 @@ export default function Scene3D() {
         <Starfield count={3000} />
         <Sun radius={1.2} />
 
-        {planets.map(p => (
-          <Planet key={p.id} config={p} />
-        ))}
+        {/* planet Alpha (paling dekat) */}
+        <Planet config={planets[0]} />
+
+        {/* asteroid belt di antara planet 1 dan 2 */}
+        <AsteroidBelt count={400} innerRadius={5.5} outerRadius={7.0} />
+
+        {/* planet Beta & Gamma */}
+        <Planet config={planets[1]} />
+        <Planet config={planets[2]} />
 
         <OrbitControls
           enablePan={false}
