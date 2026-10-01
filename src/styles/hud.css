@@ -1,0 +1,88 @@
+.hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  color: var(--ink);
+}
+
+/* scanline tipis */
+.hud__scanline {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(245, 240, 232, 0.015) 3px,
+    rgba(245, 240, 232, 0.015) 4px
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* corner brackets */
+.hud__corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--accent);
+  opacity: 0.55;
+}
+.hud__corner--tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+.hud__corner--tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+.hud__corner--bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+.hud__corner--br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+/* teks misi di atas kiri */
+.hud__mission {
+  position: absolute;
+  top: 32px;
+  left: 56px;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  color: var(--accent);
+}
+.hud__sub {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  letter-spacing: 0.18em;
+  font-size: 10px;
+}
+
+/* progress bar di bawah */
+.hud__progress {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 42vw;
+  max-width: 520px;
+  height: 1px;
+  background: rgba(245, 240, 232, 0.12);
+}
+.hud__progress > i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* label status kecil di bawah kanan */
+.hud__status {
+  position: absolute;
+  bottom: 32px;
+  right: 56px;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--muted);
+  text-align: right;
+  line-height: 1.8;
+}
+.hud__status b {
+  color: var(--accent);
+  font-weight: 500;
+}
