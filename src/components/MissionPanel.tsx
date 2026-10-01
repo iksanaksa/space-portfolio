@@ -13,14 +13,14 @@ export default function MissionPanel() {
         <>
           <header className="panel__header">
             <div className="panel__codename">
-              {planet.name.toUpperCase()}
+              ORION-{planet.name.toUpperCase()}
               <span className="panel__dot" />
             </div>
             <button
               type="button"
               className="panel__close"
               onClick={closePlanet}
-              aria-label="Close"
+              aria-label="Tutup"
             >
               <span />
               <span />
@@ -30,16 +30,16 @@ export default function MissionPanel() {
           <div className="panel__body">
             <div className="panel__meta">
               <div>
-                <em>JARAK</em>
-                <span>{planet.distance.toFixed(1)} AU</span>
+                <em>TAHUN</em>
+                <span>{planet.year}</span>
               </div>
               <div>
-                <em>RADIUS</em>
-                <span>{planet.radius.toFixed(2)}</span>
+                <em>PERAN</em>
+                <span>{planet.role}</span>
               </div>
               <div>
-                <em>ORBIT</em>
-                <span>{planet.speed.toFixed(2)} rad/s</span>
+                <em>DURASI</em>
+                <span>{planet.duration}</span>
               </div>
             </div>
 
@@ -47,19 +47,24 @@ export default function MissionPanel() {
               {planet.name.charAt(0).toUpperCase() + planet.name.slice(1)}
             </h2>
 
-            <p className="panel__summary">
-              Ini adalah deskripsi placeholder untuk planet {planet.name}.
-              Konten asli akan diisi dari content collection Markdown di sesi
-              berikutnya.
-            </p>
+            <p className="panel__summary">{planet.summary}</p>
 
-            <div className="panel__placeholder">
-              <em>CATATAN</em>
-              <p>
-                Data project (tahun, role, stack, galeri) akan ditambahkan
-                setelah kita bikin content collection dan project page.
-              </p>
-            </div>
+            <section className="panel__stack">
+              <em className="panel__label">TEKNOLOGI</em>
+              <ul>
+                {planet.stack.map((s) => (
+                  <li key={s}>{s}</li>
+                ))}
+              </ul>
+            </section>
+
+            <a
+              href={`/work/${planet.id}`}
+              className="panel__fullpage"
+            >
+              <span>BUKA HALAMAN PENUH</span>
+              <span aria-hidden>→</span>
+            </a>
           </div>
         </>
       )}
