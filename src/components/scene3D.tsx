@@ -9,7 +9,14 @@ import { planets } from '../data/planets'
 export default function Scene3D() {
   return (
     <div style={{ width: '100%', height: '500px', marginTop: '40px' }}>
-      <Canvas camera={{ position: [0, 6, 10], fov: 45 }}>
+      <Canvas
+        camera={{ position: [0, 6, 10], fov: 45 }}
+        gl={{
+          antialias: false,
+          powerPreference: 'high-performance',
+        }}
+        dpr={[1, 1]}
+      >
         <color attach="background" args={['#05070f']} />
 
         <ambientLight intensity={0.08} />
@@ -17,13 +24,8 @@ export default function Scene3D() {
         <Starfield count={3000} />
         <Sun radius={1.2} />
 
-        {/* planet Alpha (paling dekat) */}
         <Planet config={planets[0]} />
-
-        {/* asteroid belt di antara planet 1 dan 2 */}
-        <AsteroidBelt count={400} innerRadius={5.5} outerRadius={7.0} />
-
-        {/* planet Beta & Gamma */}
+        <AsteroidBelt count={500} innerRadius={5.5} outerRadius={6.5} />
         <Planet config={planets[1]} />
         <Planet config={planets[2]} />
 

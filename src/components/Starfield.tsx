@@ -14,7 +14,7 @@ export default function Starfield({ count = 3000 }: Props) {
     const arr = new Float32Array(count * 3)
     for (let i = 0; i < count; i++) {
       // Sebar di bola radius antara 20 dan 120
-      const r = 20 + Math.random() * 100
+      const r = 40 + Math.random() * 80
       const theta = Math.random() * Math.PI * 2      // sudut horizontal
       const phi = Math.acos(2 * Math.random() - 1)   // sudut vertikal (uniform)
 
