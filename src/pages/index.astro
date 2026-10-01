@@ -2,10 +2,12 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Scene3D from '../components/Scene3D'
 import HUD from '../components/HUD'
+import MissionPanel from '../components/MissionPanel'
 ---
 
 <BaseLayout title="Mission Portfolio">
   <HUD client:load />
+  <MissionPanel client:load />
 
   <main style="max-width: 720px; margin: 0 auto; padding: 15vh 24px;">
     <p style="font-size: 11px; letter-spacing: 0.3em; color: var(--muted);">
