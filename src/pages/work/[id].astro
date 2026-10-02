@@ -1,16 +1,23 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { planets } from '../../data/planets'
+import { getCollection, render } from 'astro:content'
 
-export function getStaticPaths() {
-  return planets.map((planet) => ({
-    params: { id: planet.id },
-    props: { planet },
+export async function getStaticPaths() {
+  const projects = await getCollection('projects')
+  return projects.map((project) => ({
+    params: { id: project.id },
+    props: { project },
   }))
 }
 
-const { planet } = Astro.props
-const title = planet.name.charAt(0).toUpperCase() + planet.name.slice(1)
+const { project } = Astro.props
+const { Content } = await render(project)
+const data = project.data
+
+// cari planet visual berdasarkan id
+const planet = planets.find((p) => p.id === project.id)
+const title = project.id.charAt(0).toUpperCase() + project.id.slice(1)
 ---
 
 <BaseLayout title={`${title} — Mission Portfolio`}>
@@ -21,43 +28,47 @@ const title = planet.name.charAt(0).toUpperCase() + planet.name.slice(1)
         <span>Beranda</span>
       </a>
       <div class="pp__coords">
-        ORBIT {planet.distance.toFixed(1)} AU
+        {planet ? `ORBIT ${planet.distance.toFixed(1)} AU` : '—'}
       </div>
       <div class="pp__codename">
         <span class="pp__dot" />
-        ORION-{planet.name.toUpperCase()}
+        ORION-{project.id.toUpperCase()}
       </div>
     </header>
 
     <section class="pp__hero">
-      <div class="pp__eyebrow">LAPORAN MISI // {planet.year}</div>
+      <div class="pp__eyebrow">LAPORAN MISI // {data.year}</div>
       <h1 class="pp__title">{title}</h1>
-      <p class="pp__lead">{planet.summary}</p>
+      <p class="pp__lead">{data.summary}</p>
     </section>
 
     <dl class="pp__meta">
       <div>
         <dt>TAHUN</dt>
-        <dd>{planet.year}</dd>
+        <dd>{data.year}</dd>
       </div>
       <div>
         <dt>PERAN</dt>
-        <dd>{planet.role}</dd>
+        <dd>{data.role}</dd>
       </div>
       <div>
         <dt>DURASI</dt>
-        <dd>{planet.duration}</dd>
+        <dd>{data.duration}</dd>
       </div>
       <div>
         <dt>TEKNOLOGI</dt>
-        <dd>{planet.stack.length} modul</dd>
+        <dd>{data.stack.length} modul</dd>
       </div>
     </dl>
+
+    <div class="pp__content prose">
+      <Content />
+    </div>
 
     <section class="pp__stack">
       <div class="pp__label">TEKNOLOGI</div>
       <ul>
-        {planet.stack.map((s, i) => (
+        {data.stack.map((s, i) => (
           <li>
             <em>{String(i + 1).padStart(2, '0')}</em>
             {s}
@@ -164,6 +175,58 @@ const title = planet.name.charAt(0).toUpperCase() + planet.name.slice(1)
     color: var(--ink);
   }
 
+  /* konten markdown */
+  .pp__content {
+    padding: 8vh 0;
+    max-width: 68ch;
+  }
+  .pp__content :global(h2) {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-top: 3.5em;
+    margin-bottom: 1em;
+    padding-bottom: 0.8em;
+    border-bottom: 1px solid rgba(245, 240, 232, 0.1);
+  }
+  .pp__content :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .pp__content :global(p) {
+    font-size: 15px;
+    line-height: 1.75;
+    color: rgba(245, 240, 232, 0.82);
+    margin: 1.4em 0;
+  }
+  .pp__content :global(strong) {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .pp__content :global(em) {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+    color: var(--ink);
+    font-size: 1.08em;
+  }
+  .pp__content :global(a) {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 209, 102, 0.35);
+  }
+  .pp__content :global(a:hover) {
+    border-bottom-color: var(--accent);
+  }
+  .pp__content :global(code) {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.88em;
+    background: rgba(245, 240, 232, 0.06);
+    padding: 2px 6px;
+    color: var(--accent);
+  }
+
   .pp__label {
     font-size: 9px;
     letter-spacing: 0.32em;
@@ -171,7 +234,8 @@ const title = planet.name.charAt(0).toUpperCase() + planet.name.slice(1)
     margin-bottom: 24px;
   }
   .pp__stack {
-    padding: 6vh 0 8vh;
+    padding: 4vh 0 8vh;
+    border-top: 1px solid rgba(245, 240, 232, 0.08);
   }
   .pp__stack ul {
     list-style: none;
@@ -212,5 +276,6 @@ const title = planet.name.charAt(0).toUpperCase() + planet.name.slice(1)
   @media (max-width: 900px) {
     .pp__meta { grid-template-columns: repeat(2, 1fr); }
     .pp__hero { padding: 8vh 0 5vh; }
+    .pp__content { padding: 6vh 0; }
   }
 </style>
