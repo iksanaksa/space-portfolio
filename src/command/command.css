@@ -163,3 +163,8 @@
   margin-right: 4px;
   color: rgba(245, 240, 232, 0.7);
 }
+.cmd__mark {
+  background: transparent;
+  color: var(--accent);
+  font-weight: 500;
+}

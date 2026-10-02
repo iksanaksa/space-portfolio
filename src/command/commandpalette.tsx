@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMission } from '../store/useMission'
 import { planets } from '../data/planets'
+import { fuzzyScore } from './fuzzy'
 
 interface Command {
   id: string
@@ -11,27 +12,33 @@ interface Command {
   action: () => void
 }
 
+interface ScoredCommand {
+  cmd: Command
+  score: number
+  indices: number[]
+  labelIndices: number[]
+}
+
 export default function CommandPalette() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [index, setIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
   const openPlanet = useMission((s) => s.openPlanet)
   const closePlanet = useMission((s) => s.closePlanet)
 
-  // daftar commands
   const commands = useMemo<Command[]>(() => {
     const list: Command[] = []
 
-    // 1. buka panel planet
     planets.forEach((p) => {
       list.push({
         id: `open-${p.id}`,
         group: 'Proyek',
         label: p.name,
         hint: 'Buka panel',
-        keywords: [p.id, p.name, p.role, ...p.stack],
+        keywords: [p.id, p.role, ...p.stack],
         action: () => {
           openPlanet(p.id)
           setOpen(false)
@@ -39,7 +46,6 @@ export default function CommandPalette() {
       })
     })
 
-    // 2. buka halaman project
     planets.forEach((p) => {
       list.push({
         id: `goto-${p.id}`,
@@ -53,7 +59,6 @@ export default function CommandPalette() {
       })
     })
 
-    // 3. aksi umum
     list.push(
       {
         id: 'close-all',
@@ -81,14 +86,51 @@ export default function CommandPalette() {
     return list
   }, [openPlanet, closePlanet])
 
-  // filter sederhana: cek apakah query ada di label atau keywords
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return commands
-    return commands.filter((c) => {
-      const target = [c.label, ...c.keywords].join(' ').toLowerCase()
-      return target.includes(q)
-    })
+  // fuzzy filter + sort
+  const results = useMemo<ScoredCommand[]>(() => {
+    const q = query.trim()
+
+    // tanpa query: tampilkan semua tanpa skor, urutan asli
+    if (!q) {
+      return commands.map((cmd) => ({
+        cmd,
+        score: 0,
+        indices: [],
+        labelIndices: [],
+      }))
+    }
+
+    const scored: ScoredCommand[] = []
+
+    for (const cmd of commands) {
+      // coba match ke label dulu
+      const labelResult = fuzzyScore(q, cmd.label)
+
+      // match ke label DAN keywords, ambil yang terbaik
+      let bestScore = labelResult?.score ?? -Infinity
+      let bestIndices = labelResult?.indices ?? []
+
+      for (const kw of cmd.keywords) {
+        const kwResult = fuzzyScore(q, kw)
+        if (kwResult && kwResult.score > bestScore) {
+          bestScore = kwResult.score
+          bestIndices = []
+        }
+      }
+
+      if (bestScore > -Infinity) {
+        // boost kalau match di label
+        const labelBoost = labelResult ? 1.4 : 1.0
+        scored.push({
+          cmd,
+          score: bestScore * labelBoost,
+          indices: bestIndices,
+          labelIndices: labelResult?.indices ?? [],
+        })
+      }
+    }
+
+    return scored.sort((a, b) => b.score - a.score)
   }, [commands, query])
 
   // reset index saat hasil berubah
@@ -96,7 +138,18 @@ export default function CommandPalette() {
     setIndex(0)
   }, [query])
 
-  // hotkey Ctrl+K / Cmd+K
+  // auto-scroll item aktif ke viewport
+  useEffect(() => {
+    if (!open) return
+    const list = listRef.current
+    if (!list) return
+    const active = list.querySelector('.cmd__item.is-active')
+    if (active) {
+      active.scrollIntoView({ block: 'nearest' })
+    }
+  }, [index, open])
+
+  // hotkey
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const isCmd = e.metaKey || e.ctrlKey
@@ -112,7 +165,7 @@ export default function CommandPalette() {
     return () => window.removeEventListener('keydown', onKey)
   }, [open])
 
-  // autofocus input saat palette terbuka
+  // autofocus
   useEffect(() => {
     if (open) {
       setQuery('')
@@ -122,7 +175,7 @@ export default function CommandPalette() {
     }
   }, [open])
 
-  // freeze scroll body saat palette terbuka
+  // freeze body scroll
   useEffect(() => {
     if (!open) return
     const prev = document.body.style.overflow
@@ -134,15 +187,22 @@ export default function CommandPalette() {
 
   if (!open) return null
 
-  // kelompokkan results
-  const rows: { kind: 'header' | 'item'; label?: string; cmd?: Command; idx?: number }[] = []
+  // render rows: header + item
+  const rows: {
+    kind: 'header' | 'item'
+    label?: string
+    scored?: ScoredCommand
+    idx?: number
+  }[] = []
+
+  // grup berdasarkan urutan kemunculan di results
   let lastGroup = ''
-  results.forEach((c, i) => {
-    if (c.group !== lastGroup) {
-      rows.push({ kind: 'header', label: c.group })
-      lastGroup = c.group
+  results.forEach((sc, i) => {
+    if (sc.cmd.group !== lastGroup) {
+      rows.push({ kind: 'header', label: sc.cmd.group })
+      lastGroup = sc.cmd.group
     }
-    rows.push({ kind: 'item', cmd: c, idx: i })
+    rows.push({ kind: 'item', scored: sc, idx: i })
   })
 
   const runCommand = (cmd: Command) => {
@@ -159,9 +219,29 @@ export default function CommandPalette() {
       setIndex((i) => Math.max(0, i - 1))
     } else if (e.key === 'Enter') {
       e.preventDefault()
-      const cmd = results[index]
-      if (cmd) runCommand(cmd)
+      const sc = results[index]
+      if (sc) runCommand(sc.cmd)
+    } else if (e.key === 'Tab') {
+      // Tab untuk autofill query dari item aktif
+      e.preventDefault()
+      const sc = results[index]
+      if (sc) setQuery(sc.cmd.label)
     }
+  }
+
+  // highlight karakter yang match di label
+  const highlight = (text: string, indices: number[]) => {
+    if (indices.length === 0) return text
+    const set = new Set(indices)
+    return [...text].map((ch, i) =>
+      set.has(i) ? (
+        <mark key={i} className="cmd__mark">
+          {ch}
+        </mark>
+      ) : (
+        <span key={i}>{ch}</span>
+      )
+    )
   }
 
   return (
@@ -187,7 +267,7 @@ export default function CommandPalette() {
           <span className="cmd__esc">ESC</span>
         </div>
 
-        <div className="cmd__list">
+        <div ref={listRef} className="cmd__list">
           {results.length === 0 && (
             <div className="cmd__empty">
               Tidak ada hasil untuk "{query}"
@@ -196,20 +276,29 @@ export default function CommandPalette() {
 
           {rows.map((row, i) =>
             row.kind === 'header' ? (
-              <div key={`h-${row.label}`} className="cmd__group">
+              <div key={`h-${row.label}-${i}`} className="cmd__group">
                 {row.label}
               </div>
             ) : (
               <button
-                key={row.cmd!.id}
+                key={row.scored!.cmd.id}
                 type="button"
-                className={`cmd__item ${row.idx === index ? 'is-active' : ''}`}
+                className={`cmd__item ${
+                  row.idx === index ? 'is-active' : ''
+                }`}
                 onMouseEnter={() => setIndex(row.idx!)}
-                onClick={() => runCommand(row.cmd!)}
+                onClick={() => runCommand(row.scored!.cmd)}
               >
-                <span>{row.cmd!.label}</span>
-                {row.cmd!.hint && (
-                  <span className="cmd__item-hint">{row.cmd!.hint}</span>
+                <span>
+                  {highlight(
+                    row.scored!.cmd.label,
+                    row.scored!.labelIndices
+                  )}
+                </span>
+                {row.scored!.cmd.hint && (
+                  <span className="cmd__item-hint">
+                    {row.scored!.cmd.hint}
+                  </span>
                 )}
               </button>
             )
@@ -219,6 +308,7 @@ export default function CommandPalette() {
         <div className="cmd__footer">
           <span><kbd>↑</kbd><kbd>↓</kbd> navigasi</span>
           <span><kbd>↵</kbd> pilih</span>
+          <span><kbd>Tab</kbd> isi otomatis</span>
           <span><kbd>⌘</kbd><kbd>K</kbd> buka/tutup</span>
         </div>
       </div>
