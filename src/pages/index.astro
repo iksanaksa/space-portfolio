@@ -3,11 +3,13 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import Scene3D from '../components/Scene3D'
 import HUD from '../components/HUD'
 import MissionPanel from '../components/MissionPanel'
+import CommandPalette from '../command/CommandPalette'
 ---
 
 <BaseLayout title="Mission Portfolio">
   <HUD client:load />
   <MissionPanel client:load />
+  <CommandPalette client:load />
 
   <main style="max-width: 720px; margin: 0 auto; padding: 15vh 24px;">
     <p style="font-size: 11px; letter-spacing: 0.3em; color: var(--muted);">
@@ -17,7 +19,7 @@ import MissionPanel from '../components/MissionPanel'
       Halo, dunia.
     </h1>
     <p style="color: rgba(245, 240, 232, 0.7);">
-      Di bawah ini adalah test render 3D pertama.
+      Tekan <kbd>Ctrl + K</kbd> untuk buka command palette.
     </p>
 
     <Scene3D client:only="react" />
