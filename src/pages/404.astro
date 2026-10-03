@@ -1,0 +1,229 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="404 — Signal Lost | Mission Portfolio"
+  description="Koordinat tidak ditemukan. Sinyal sudah meninggalkan sektor ini."
+>
+  <main class="nf">
+    <div class="nf__noise" aria-hidden />
+    <div class="nf__sweep" aria-hidden />
+
+    <span class="nf__c nf__c--tl" />
+    <span class="nf__c nf__c--tr" />
+    <span class="nf__c nf__c--bl" />
+    <span class="nf__c nf__c--br" />
+
+    <div class="nf__content">
+      <div class="nf__status">
+        <span class="nf__blink" />
+        NO CARRIER
+      </div>
+
+      <h1 class="nf__title">
+        <span>SIGNAL</span>
+        <span class="nf__title--lost">LOST</span>
+      </h1>
+
+      <p class="nf__lead">
+        Koordinat tidak ditemukan. Sinyal yang Anda cari mungkin sudah
+        meninggalkan sektor ini, atau tidak pernah ada.
+      </p>
+
+      <dl class="nf__readout">
+        <div>
+          <dt>STATUS</dt>
+          <dd class="nf__lock">FAILED</dd>
+        </div>
+        <div>
+          <dt>FREQ</dt>
+          <dd>— — — . — — MHz</dd>
+        </div>
+        <div>
+          <dt>SECTOR</dt>
+          <dd>07 — ORION</dd>
+        </div>
+      </dl>
+
+      <a href="/" class="nf__action">
+        <span class="nf__action-mark" aria-hidden>◆</span>
+        RE-ESTABLISH LINK
+      </a>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .nf {
+    position: fixed;
+    inset: 0;
+    background: #05070f;
+    color: var(--ink);
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 6vh 6vw;
+  }
+
+  /* noise — SVG turbulence sebagai data URI */
+  .nf__noise {
+    position: absolute;
+    inset: -20%;
+    pointer-events: none;
+    opacity: 0.14;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 200px 200px;
+    animation: nfNoise 0.35s steps(4) infinite;
+  }
+  @keyframes nfNoise {
+    0%   { transform: translate(0, 0); }
+    25%  { transform: translate(-2%, 1%); }
+    50%  { transform: translate(1%, -2%); }
+    75%  { transform: translate(-1%, -1%); }
+    100% { transform: translate(0, 0); }
+  }
+
+  /* scanline sweep */
+  .nf__sweep {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(255, 209, 102, 0.06) 48%,
+      rgba(255, 209, 102, 0.12) 50%,
+      rgba(255, 209, 102, 0.06) 52%,
+      transparent 100%
+    );
+    background-size: 100% 40vh;
+    background-repeat: no-repeat;
+    animation: nfSweep 5.5s linear infinite;
+  }
+  @keyframes nfSweep {
+    from { background-position: 0 -40vh; }
+    to   { background-position: 0 100vh; }
+  }
+
+  /* corner brackets */
+  .nf__c {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border: 1px solid rgba(255, 209, 102, 0.5);
+  }
+  .nf__c--tl { top: 22px; left: 22px; border-right: none; border-bottom: none; }
+  .nf__c--tr { top: 22px; right: 22px; border-left: none; border-bottom: none; }
+  .nf__c--bl { bottom: 22px; left: 22px; border-right: none; border-top: none; }
+  .nf__c--br { bottom: 22px; right: 22px; border-left: none; border-top: none; }
+
+  /* content */
+  .nf__content {
+    position: relative;
+    z-index: 2;
+    max-width: 640px;
+    width: 100%;
+  }
+
+  .nf__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 10px;
+    letter-spacing: 0.34em;
+    color: #ff5f1f;
+    margin-bottom: 32px;
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 95, 31, 0.35);
+  }
+  .nf__blink {
+    width: 6px;
+    height: 6px;
+    background: #ff5f1f;
+    box-shadow: 0 0 8px #ff5f1f;
+    animation: nfBlink 0.9s steps(2) infinite;
+  }
+  @keyframes nfBlink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0.15; }
+  }
+
+  .nf__title {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(64px, 12vw, 160px);
+    line-height: 0.88;
+    letter-spacing: -0.03em;
+    margin: 0 0 28px;
+    display: flex;
+    flex-direction: column;
+  }
+  .nf__title--lost {
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(255, 209, 102, 0.35);
+  }
+
+  .nf__lead {
+    font-size: 13px;
+    line-height: 1.75;
+    color: rgba(245, 240, 232, 0.68);
+    max-width: 46ch;
+    margin: 0 0 44px;
+  }
+
+  /* readout */
+  .nf__readout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px 32px;
+    padding: 24px 0;
+    border-top: 1px solid rgba(245, 240, 232, 0.1);
+    border-bottom: 1px solid rgba(245, 240, 232, 0.1);
+    margin: 0 0 44px;
+  }
+  .nf__readout > div { margin: 0; }
+  .nf__readout dt {
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .nf__readout dd {
+    margin: 0;
+    font-size: 15px;
+    color: rgba(245, 240, 232, 0.92);
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .nf__lock { color: #ff5f1f !important; }
+
+  /* action */
+  .nf__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border: 1px solid rgba(255, 209, 102, 0.4);
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    transition: gap 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+  }
+  .nf__action:hover {
+    gap: 20px;
+    background: rgba(255, 209, 102, 0.06);
+    border-color: var(--accent);
+  }
+  .nf__action-mark { font-size: 9px; }
+
+  @media (max-width: 700px) {
+    .nf__title { font-size: clamp(56px, 18vw, 88px); }
+    .nf { padding: 8vh 6vw; }
+    .nf__readout { grid-template-columns: 1fr 1fr; }
+  }
+</style>
