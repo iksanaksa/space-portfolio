@@ -1,0 +1,9 @@
+﻿node_modules/
+.astro/
+dist/
+.git/
+*.log
+.env
+.env.production
+.DS_Store
+README.md
