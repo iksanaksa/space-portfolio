@@ -1,31 +1,60 @@
 ---
 import '../styles/global.css'
 import '../styles/hud.css'
-import '../styles/global.css'
-import '../styles/hud.css'
-import '../styles/mission-panel.css'
-import '../styles/global.css'
-import '../styles/hud.css'
 import '../styles/mission-panel.css'
 import '../command/command.css'
+
 interface Props {
   title: string
   description?: string
+  ogType?: 'website' | 'article'
+  ogImage?: string
+  canonical?: string
 }
 
 const {
   title,
-  description = 'Portofolio interaktif dengan scene 3D.',
+  description = 'Portofolio interaktif dengan scene 3D. Jelajahi proyek sebagai planet dan stasiun.',
+  ogType = 'website',
+  ogImage = '/og/default.png',
+  canonical,
 } = Astro.props
+
+const site = Astro.site?.toString().replace(/\/$/, '') ?? 'http://localhost:4321'
+const canonicalURL = canonical
+  ? `${site}${canonical}`
+  : new URL(Astro.url.pathname, Astro.site ?? Astro.url)
+const ogImageURL = ogImage.startsWith('http')
+  ? ogImage
+  : `${site}${ogImage}`
 ---
 <!doctype html>
 <html lang="id">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
     <title>{title}</title>
     <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonicalURL} />}
 
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:site_name" content="Mission Portfolio" />
+    <meta property="og:locale" content="id_ID" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

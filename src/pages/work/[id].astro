@@ -15,12 +15,17 @@ const { project } = Astro.props
 const { Content } = await render(project)
 const data = project.data
 
-// cari planet visual berdasarkan id
 const planet = planets.find((p) => p.id === project.id)
 const title = project.id.charAt(0).toUpperCase() + project.id.slice(1)
+const fullTitle = `${title} — ${data.role} | Mission Portfolio`
 ---
 
-<BaseLayout title={`${title} — Mission Portfolio`}>
+<BaseLayout
+  title={fullTitle}
+  description={data.summary}
+  ogType="article"
+  canonical={`/work/${project.id}`}
+>
   <article class="pp">
     <header class="pp__bar">
       <a href="/" class="pp__back">
