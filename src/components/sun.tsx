@@ -4,9 +4,11 @@ import * as THREE from 'three'
 import { sunVert } from '../shaders/sun.vert.ts'
 import { sunFrag } from '../shaders/sun.frag.ts'
 import { coronaFrag } from '../shaders/corona.frag.ts'
+import { useMission } from '../store/useMission'
 
-export default function Sun({ radius = 1 }) {
+export default function Sun({ radius = 1 }: { radius?: number }) {
   const coronaRef = useRef<THREE.Mesh>(null)
+  const openSun = useMission((s) => s.openSun)
 
   const surfaceUniforms = useMemo(
     () => ({
@@ -30,7 +32,6 @@ export default function Sun({ radius = 1 }) {
     const t = clock.getElapsedTime()
     surfaceUniforms.uTime.value = t
 
-    // corona bernafas pelan
     if (coronaRef.current) {
       const s = 1.35 + Math.sin(t * 0.8) * 0.02
       coronaRef.current.scale.setScalar(s)
@@ -38,8 +39,19 @@ export default function Sun({ radius = 1 }) {
   })
 
   return (
-    <group>
-      {/* lapisan 1: permukaan matahari */}
+    <group
+      onClick={(e) => {
+        e.stopPropagation()
+        openSun()
+      }}
+      onPointerOver={(e) => {
+        e.stopPropagation()
+        document.body.style.cursor = 'pointer'
+      }}
+      onPointerOut={() => {
+        document.body.style.cursor = 'auto'
+      }}
+    >
       <mesh>
         <sphereGeometry args={[radius, 96, 96]} />
         <shaderMaterial
@@ -49,7 +61,6 @@ export default function Sun({ radius = 1 }) {
         />
       </mesh>
 
-      {/* lapisan 2: corona (glow) */}
       <mesh ref={coronaRef} scale={1.35}>
         <sphereGeometry args={[radius, 48, 48]} />
         <shaderMaterial
@@ -63,7 +74,6 @@ export default function Sun({ radius = 1 }) {
         />
       </mesh>
 
-      {/* sumber cahaya untuk planet-planet nanti */}
       <pointLight intensity={3} distance={60} color="#ffcc66" />
     </group>
   )

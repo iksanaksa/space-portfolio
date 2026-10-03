@@ -209,3 +209,15 @@
     min-width: 0;
   }
 }
+.panel--sun .panel__title {
+  color: #ffd166;
+}
+
+.panel--sun .panel__dot {
+  background: #ff5f1f;
+  box-shadow: 0 0 10px #ff5f1f;
+}
+
+.panel--sun .panel__stack a:hover {
+  text-decoration: underline;
+}
